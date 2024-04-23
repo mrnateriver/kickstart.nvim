@@ -551,6 +551,14 @@ require('lazy').setup({
         -- tsserver = {},
         --
 
+        angularls = {
+          filetypes = {
+            'ts',
+            'typescript',
+            'html',
+          },
+        },
+
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -583,17 +591,70 @@ require('lazy').setup({
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      local lspconfig = require 'lspconfig'
+      local lspconfig_util = require 'lspconfig.util'
+
       require('mason-lspconfig').setup {
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
+
             -- This handles overriding only values explicitly passed
             -- by the server configuration above. Useful when disabling
             -- certain features of an LSP (for example, turning off formatting for tsserver)
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
+
+            if server_name == 'angularls' then
+              local cmd = {
+                'ngserver',
+                '--stdio',
+                '--tsProbeLocations',
+                '~/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib',
+                '--ngProbeLocations',
+                '~/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin',
+              }
+
+              root_dir = lspconfig_util.root_pattern('angular.json', 'project.json', 'nx.json', 'workspace.json', 'package.json')
+
+              lspconfig.angularls.setup {
+                cmd = cmd,
+                root_dir = root_dir,
+                capabilities = server.capabilities,
+                on_attach = on_attach,
+                settings = server,
+                filetypes = server.filetypes,
+                on_new_config = function(new_config, _)
+                  new_config.cmd = cmd
+                end,
+              }
+            elseif server_name == 'eslint' then
+              lspconfig.eslint.setup {
+                capabilities = server.capabilities,
+                on_attach = function(_, bufnr)
+                  -- configure ESLint LSP action
+                  on_attach(_, bufnr)
+                  vim.api.nvim_create_autocmd('BufWritePre', {
+                    buffer = bufnr,
+                    command = 'EslintFixAll',
+                  })
+                end,
+                settings = server,
+                filetypes = server.filetypes,
+              }
+            else
+              lspconfig[server_name].setup {
+                capabilities = server.capabilities,
+                on_attach = on_attach,
+                settings = server,
+                filetypes = server.filetypes,
+              }
+            end
           end,
         },
+      }
+
+      require('lspconfig').dartls.setup {
+        cmd = { 'dart', 'language-server', '--protocol=lsp' },
       }
     end,
   },

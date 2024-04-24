@@ -161,11 +161,6 @@ vim.opt.scrolloff = 10
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
-vim.opt.foldcolumn = '1' -- '0' is not bad
-vim.opt.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
-vim.opt.foldlevelstart = 99
-vim.opt.foldenable = true
-
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
@@ -296,7 +291,34 @@ require('lazy').setup({
   {
     'kevinhwang91/nvim-ufo',
     dependencies = { 'kevinhwang91/promise-async' },
-    config = function()
+    event = 'VeryLazy',
+    opts = {
+      provider_selector = function(bufnr, filetype, buftype)
+        return { 'treesitter', 'indent' }
+      end,
+      open_fold_hl_timeout = 400,
+      preview = {
+        win_config = {
+          border = { '', '─', '', '', '', '─', '', '' },
+          -- winhighlight = "Normal:Folded",
+          winblend = 0,
+        },
+        mappings = {
+          scrollU = '<C-u>',
+          scrollD = '<C-d>',
+          jumpTop = '[',
+          jumpBot = ']',
+        },
+      },
+    },
+    init = function()
+      vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+      vim.o.foldcolumn = '1' -- '0' is not bad
+      vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+      vim.o.foldlevelstart = 99
+      vim.o.foldenable = true
+    end,
+    config = function(_, opts)
       local fold_label_handler = function(virtText, lnum, endLnum, width, truncate)
         local newVirtText = {}
         local suffix = (' 󰁂 %d '):format(endLnum - lnum)
@@ -324,13 +346,9 @@ require('lazy').setup({
         table.insert(newVirtText, { suffix, 'MoreMsg' })
         return newVirtText
       end
+      opts['fold_virt_text_handler'] = fold_label_handler
 
-      require('ufo').setup {
-        fold_virt_text_handler = fold_label_handler,
-        provider_selector = function(bufnr, filetype, buftype)
-          return { 'treesitter', 'indent' }
-        end,
-      }
+      require('ufo').setup(opts)
 
       -- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
       vim.keymap.set('n', 'zR', require('ufo').openAllFolds)

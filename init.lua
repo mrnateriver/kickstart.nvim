@@ -1000,6 +1000,7 @@ require('lazy').setup({
     dependencies = {
       'nvim-treesitter/nvim-treesitter-context',
       'nvim-treesitter/nvim-treesitter-textobjects',
+      'windwp/nvim-ts-autotag',
     },
     build = ':TSUpdate',
     opts = {
@@ -1026,6 +1027,9 @@ require('lazy').setup({
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
+      autotag = {
+        enable = true,
+      },
       highlight = {
         enable = true,
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.

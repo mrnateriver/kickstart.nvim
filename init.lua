@@ -723,7 +723,7 @@ require('lazy').setup({
                 cmd = cmd,
                 root_dir = root_dir,
                 capabilities = server.capabilities,
-                settings = server,
+                settings = server.settings,
                 filetypes = server.filetypes,
                 on_new_config = function(new_config, _)
                   new_config.cmd = cmd
@@ -739,13 +739,13 @@ require('lazy').setup({
                     command = 'EslintFixAll',
                   })
                 end,
-                settings = server,
+                settings = server.settings,
                 filetypes = server.filetypes,
               }
             else
               lspconfig[server_name].setup {
                 capabilities = server.capabilities,
-                settings = server,
+                settings = server.settings,
                 filetypes = server.filetypes,
               }
             end

@@ -747,7 +747,7 @@ require('lazy').setup({
                 '~/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin',
               }
 
-              root_dir = lspconfig_util.root_pattern('angular.json', 'project.json', 'nx.json', 'workspace.json', 'package.json')
+              local root_dir = lspconfig_util.root_pattern('angular.json', 'project.json', 'nx.json', 'workspace.json', 'package.json')
 
               lspconfig.angularls.setup {
                 cmd = cmd,

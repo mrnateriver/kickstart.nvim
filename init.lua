@@ -601,14 +601,15 @@ require('lazy').setup({
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
-          if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
-            -- map('<leader>th', function()
-            --   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-            -- end, '[T]oggle Inlay [H]ints')
+          if client and vim.lsp.inlay_hint and client.server_capabilities.inlayHintProvider then
             vim.lsp.inlay_hint.enable(true)
-          end
 
-          vim.cmd.hi 'LspInlayHint guibg=#000'
+            map('<leader>th', function()
+              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+            end, '[T]oggle Inlay [H]ints')
+
+            vim.cmd.hi 'LspInlayHint guibg=#000'
+          end
         end,
       })
 

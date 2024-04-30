@@ -602,10 +602,13 @@ require('lazy').setup({
           --
           -- This may be unwanted, since they displace some of your code
           if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
-            end, '[T]oggle Inlay [H]ints')
+            -- map('<leader>th', function()
+            --   vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+            -- end, '[T]oggle Inlay [H]ints')
+            vim.lsp.inlay_hint.enable(true)
           end
+
+          vim.cmd.hi 'LspInlayHint guibg=#000'
         end,
       })
 
@@ -640,6 +643,16 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      local jsInlaySettings = {
+        includeInlayParameterNameHints = 'all', -- 'none' | 'literals' | 'all'
+        includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      }
       local servers = {
         -- clangd = {},
         -- gopls = {},
@@ -673,6 +686,23 @@ require('lazy').setup({
               },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
               -- diagnostics = { disable = { 'missing-fields' } },
+            },
+          },
+        },
+
+        tsserver = {
+          settings = {
+            typescript = {
+              inlayHints = jsInlaySettings,
+            },
+            javascript = {
+              inlayHints = jsInlaySettings,
+            },
+            typescriptreact = {
+              inlayHints = jsInlaySettings,
+            },
+            javascriptreact = {
+              inlayHints = jsInlaySettings,
             },
           },
         },
@@ -744,6 +774,7 @@ require('lazy').setup({
               }
             else
               lspconfig[server_name].setup {
+                inlayHints = { enabled = true },
                 capabilities = server.capabilities,
                 settings = server.settings,
                 filetypes = server.filetypes,
@@ -755,6 +786,7 @@ require('lazy').setup({
 
       require('lspconfig').dartls.setup {
         cmd = { 'dart', 'language-server', '--protocol=lsp' },
+        inlayHints = { enabled = true },
       }
     end,
   },
@@ -791,7 +823,11 @@ require('lazy').setup({
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        -- TODO: extract to a common var
+        javascript = { { 'prettierd', 'prettier' } },
+        javascriptreact = { { 'prettierd', 'prettier' } },
+        typescript = { { 'prettierd', 'prettier' } },
+        typescriptreact = { { 'prettierd', 'prettier' } },
       },
     },
   },

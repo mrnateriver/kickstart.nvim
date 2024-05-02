@@ -273,6 +273,28 @@ require('lazy').setup({
   -- after the plugin has been loaded:
   --  config = function() ... end
   --
+  --
+  {
+    'stevearc/aerial.nvim',
+    -- event = 'VeryLazy',
+    opts = {},
+    -- Optional dependencies
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function(_, opts)
+      require('aerial').setup {
+        manage_folds = true,
+      }
+
+      vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', { desc = 'Jump to previous symbol' })
+      vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', { desc = 'Jump to next symbol' })
+
+      -- You probably also want to set a keymap to toggle aerial
+      vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
+    end,
+  },
 
   {
     'kevinhwang91/nvim-ufo',
@@ -1068,6 +1090,11 @@ require('lazy').setup({
     'nvim-lualine/lualine.nvim',
     -- See `:help lualine.txt`
     opts = {
+      sections = {
+        lualine_x = {
+          'aerial',
+        },
+      },
       options = {
         icons_enabled = true,
         -- theme = 'ayu_dark',
@@ -1201,15 +1228,15 @@ require('lazy').setup({
             ['[]'] = '@class.outer',
           },
         },
-        swap = {
-          enable = true,
-          swap_next = {
-            ['<leader>a'] = '@parameter.inner',
-          },
-          swap_previous = {
-            ['<leader>A'] = '@parameter.inner',
-          },
-        },
+        -- swap = {
+        --   enable = true,
+        --   swap_next = {
+        --     ['<leader>a'] = '@parameter.inner',
+        --   },
+        --   swap_previous = {
+        --     ['<leader>A'] = '@parameter.inner',
+        --   },
+        -- },
       },
     },
     config = function(_, opts)

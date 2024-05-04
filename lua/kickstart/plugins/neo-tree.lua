@@ -22,13 +22,13 @@ return {
         local modify = vim.fn.fnamemodify
 
         local vals = {
-          ['BASENAME'] = modify(filename, ':r'),
-          ['EXTENSION'] = modify(filename, ':e'),
-          ['FILENAME'] = filename,
-          ['PATH (CWD)'] = modify(filepath, ':.'),
-          ['PATH (HOME)'] = modify(filepath, ':~'),
-          ['PATH'] = filepath,
-          ['URI'] = vim.uri_from_fname(filepath),
+          ['Basename'] = modify(filename, ':r'),
+          ['Extension'] = modify(filename, ':e'),
+          ['Filename'] = filename,
+          ['Path (CWD)'] = modify(filepath, ':.'),
+          ['Path (HOME)'] = modify(filepath, ':~'),
+          ['Path'] = filepath,
+          ['Uri'] = vim.uri_from_fname(filepath),
         }
 
         local options = vim.tbl_filter(function(val)

@@ -682,6 +682,16 @@ require('lazy').setup({
         includeInlayFunctionLikeReturnTypeHints = true,
         includeInlayEnumMemberValueHints = true,
       }
+
+      local function tsserver_organize_imports()
+        local params = {
+          command = '_typescript.organizeImports',
+          arguments = { vim.api.nvim_buf_get_name(0) },
+          title = '',
+        }
+        vim.lsp.buf.execute_command(params)
+      end
+
       local servers = {
         -- clangd = {},
         -- gopls = {},
@@ -720,6 +730,14 @@ require('lazy').setup({
         },
 
         tsserver = {
+          commands = {
+            OrganizeImports = {
+              function()
+                tsserver_organize_imports()
+              end,
+              description = 'Organize Imports',
+            },
+          },
           settings = {
             typescript = {
               inlayHints = jsInlaySettings,
@@ -784,6 +802,7 @@ require('lazy').setup({
                 capabilities = server.capabilities,
                 settings = server.settings,
                 filetypes = server.filetypes,
+                commands = server.commands,
                 on_new_config = function(new_config, _)
                   new_config.cmd = cmd
                 end,
@@ -800,6 +819,7 @@ require('lazy').setup({
                 end,
                 settings = server.settings,
                 filetypes = server.filetypes,
+                commands = server.commands,
               }
             else
               lspconfig[server_name].setup {
@@ -807,6 +827,7 @@ require('lazy').setup({
                 capabilities = server.capabilities,
                 settings = server.settings,
                 filetypes = server.filetypes,
+                commands = server.commands,
               }
             end
           end,

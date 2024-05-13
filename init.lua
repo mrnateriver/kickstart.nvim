@@ -299,6 +299,35 @@ require('lazy').setup({
   },
 
   {
+    'smoka7/hop.nvim',
+    version = 'v2.6.0',
+    opts = {
+      keys = 'etovxqpdygfblzhckisuran',
+    },
+    config = function(_, opts)
+      local hop = require 'hop'
+      hop.setup(opts)
+
+      vim.keymap.set('n', '<leader><leader>w', function()
+        hop.hint_words {}
+      end, { desc = 'Hop to word' })
+      -- local directions = require('hop.hint').HintDirection
+      -- vim.keymap.set('', '<leader><leader>w', function()
+      --   hop.hint_char1 { direction = directions.AFTER_CURSOR, current_line_only = false }
+      -- end, { remap = true })
+      -- vim.keymap.set('', '<leader><leader>W', function()
+      --   hop.hint_char1 { direction = directions.BEFORE_CURSOR, current_line_only = false }
+      -- end, { remap = true })
+      -- vim.keymap.set('', 't', function()
+      --   hop.hint_char1 { direction = directions.AFTER_CURSOR, current_line_only = true, hint_offset = -1 }
+      -- end, { remap = true })
+      -- vim.keymap.set('', 'T', function()
+      --   hop.hint_char1 { direction = directions.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 }
+      -- end, { remap = true })
+    end,
+  },
+
+  {
     'kevinhwang91/nvim-ufo',
     dependencies = { 'kevinhwang91/promise-async' },
     event = 'VeryLazy',

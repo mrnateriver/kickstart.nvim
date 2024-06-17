@@ -1032,39 +1032,39 @@ require('lazy').setup({
     end,
   },
 
-  -- {
-  --   'projekt0n/github-nvim-theme',
-  --   lazy = false, -- make sure we load this during startup if it is your main colorscheme
-  --   priority = 1000, -- make sure to load this before all the other start plugins
-  --   config = function()
-  --     require('github-theme').setup {
-  --       options = {
-  --         transparent = true,
-  --       },
-  --     }
-  --
-  --     vim.cmd.colorscheme 'github_dark_default'
-  --     vim.cmd.hi 'Comment gui=none'
-  --   end,
-  -- },
-  --
   {
-    'folke/tokyonight.nvim',
-    lazy = false,
-    priority = 1000,
+    'projekt0n/github-nvim-theme',
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    priority = 1000, -- make sure to load this before all the other start plugins
     config = function()
-      require('tokyonight').setup {
-        style = 'night',
-        transparent = true,
-        styles = {
-          sidebars = 'transparent',
-          floats = 'dark',
+      require('github-theme').setup {
+        options = {
+          transparent = true,
         },
       }
 
-      vim.cmd.colorscheme 'tokyonight'
+      vim.cmd.colorscheme 'github_light_default'
+      vim.cmd.hi 'Comment gui=none'
     end,
   },
+
+  -- {
+  --   'folke/tokyonight.nvim',
+  --   lazy = false,
+  --   priority = 1000,
+  --   config = function()
+  --     require('tokyonight').setup {
+  --       style = 'night',
+  --       transparent = true,
+  --       styles = {
+  --         sidebars = 'transparent',
+  --         floats = 'dark',
+  --       },
+  --     }
+  --
+  --     vim.cmd.colorscheme 'tokyonight'
+  --   end,
+  -- },
   -- {
   --   'catppuccin/nvim',
   --   name = 'catppuccin',
@@ -1164,7 +1164,7 @@ require('lazy').setup({
       options = {
         icons_enabled = true,
         -- theme = 'ayu_dark',
-        theme = 'tokyonight',
+        -- theme = 'tokyonight',
         -- component_separators = '|',
         -- section_separators = '',
       },

@@ -759,6 +759,11 @@ require('lazy').setup({
         },
 
         tsserver = {
+          handlers = {
+            ['window/showMessage'] = function(_, result)
+              vim.notify('LSP Error' .. result.message, vim.log.levels.ERROR)
+            end,
+          },
           commands = {
             OrganizeImports = {
               function()

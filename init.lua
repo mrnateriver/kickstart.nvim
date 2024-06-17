@@ -735,13 +735,13 @@ require('lazy').setup({
         -- tsserver = {},
         --
 
-        angularls = {
-          filetypes = {
-            'ts',
-            'typescript',
-            'html',
-          },
-        },
+        -- angularls = {
+        --   filetypes = {
+        --     'ts',
+        --     'typescript',
+        --     'html',
+        --   },
+        -- },
 
         lua_ls = {
           -- cmd = {...},
@@ -813,30 +813,32 @@ require('lazy').setup({
             -- certain features of an LSP (for example, turning off formatting for tsserver)
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
 
-            if server_name == 'angularls' then
-              local cmd = {
-                'ngserver',
-                '--stdio',
-                '--tsProbeLocations',
-                '~/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib',
-                '--ngProbeLocations',
-                '~/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin',
-              }
-
-              local root_dir = lspconfig_util.root_pattern('angular.json', 'project.json', 'nx.json', 'workspace.json', 'package.json')
-
-              lspconfig.angularls.setup {
-                cmd = cmd,
-                root_dir = root_dir,
-                capabilities = server.capabilities,
-                settings = server.settings,
-                filetypes = server.filetypes,
-                commands = server.commands,
-                on_new_config = function(new_config, _)
-                  new_config.cmd = cmd
-                end,
-              }
-            elseif server_name == 'eslint' then
+            -- if server_name == 'angularls' then
+            --   local cmd = {
+            --     'ngserver',
+            --     '--stdio',
+            --     '--tsProbeLocations',
+            --     '~/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib',
+            --     '--ngProbeLocations',
+            --     '~/.local/share/nvim/mason/packages/angular-language-server/node_modules/@angular/language-server/bin',
+            --   }
+            --
+            --   local root_dir = lspconfig_util.root_pattern('angular.json', 'project.json', 'nx.json', 'workspace.json', 'package.json')
+            --
+            --   lspconfig.angularls.setup {
+            --     cmd = cmd,
+            --     root_dir = root_dir,
+            --     capabilities = server.capabilities,
+            --     settings = server.settings,
+            --     filetypes = server.filetypes,
+            --     commands = server.commands,
+            --     handlers = server.handlers,
+            --     on_new_config = function(new_config, _)
+            --       new_config.cmd = cmd
+            --     end,
+            --   }
+            -- elseif server_name == 'eslint' then
+            if server_name == 'eslint' then
               lspconfig.eslint.setup {
                 capabilities = server.capabilities,
                 on_attach = function(_, bufnr)
@@ -849,6 +851,7 @@ require('lazy').setup({
                 settings = server.settings,
                 filetypes = server.filetypes,
                 commands = server.commands,
+                handlers = server.handlers,
               }
             else
               lspconfig[server_name].setup {
@@ -857,16 +860,17 @@ require('lazy').setup({
                 settings = server.settings,
                 filetypes = server.filetypes,
                 commands = server.commands,
+                handlers = server.handlers,
               }
             end
           end,
         },
       }
 
-      require('lspconfig').dartls.setup {
-        cmd = { 'dart', 'language-server', '--protocol=lsp' },
-        inlayHints = { enabled = true },
-      }
+      -- require('lspconfig').dartls.setup {
+      --   cmd = { 'dart', 'language-server', '--protocol=lsp' },
+      --   inlayHints = { enabled = true },
+      -- }
     end,
   },
 

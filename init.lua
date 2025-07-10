@@ -701,25 +701,25 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-      local jsInlaySettings = {
-        includeInlayParameterNameHints = 'all', -- 'none' | 'literals' | 'all'
-        includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-        includeInlayVariableTypeHints = true,
-        includeInlayFunctionParameterTypeHints = true,
-        includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-        includeInlayPropertyDeclarationTypeHints = true,
-        includeInlayFunctionLikeReturnTypeHints = true,
-        includeInlayEnumMemberValueHints = true,
-      }
-
-      local function tsserver_organize_imports()
-        local params = {
-          command = '_typescript.organizeImports',
-          arguments = { vim.api.nvim_buf_get_name(0) },
-          title = '',
-        }
-        vim.lsp.buf.execute_command(params)
-      end
+      -- local jsInlaySettings = {
+      --   includeInlayParameterNameHints = 'all', -- 'none' | 'literals' | 'all'
+      --   includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+      --   includeInlayVariableTypeHints = true,
+      --   includeInlayFunctionParameterTypeHints = true,
+      --   includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+      --   includeInlayPropertyDeclarationTypeHints = true,
+      --   includeInlayFunctionLikeReturnTypeHints = true,
+      --   includeInlayEnumMemberValueHints = true,
+      -- }
+      --
+      -- local function tsserver_organize_imports()
+      --   local params = {
+      --     command = '_typescript.organizeImports',
+      --     arguments = { vim.api.nvim_buf_get_name(0) },
+      --     title = '',
+      --   }
+      --   vim.lsp.buf.execute_command(params)
+      -- end
 
       local servers = {
         -- clangd = {},
@@ -743,6 +743,8 @@ require('lazy').setup({
         --   },
         -- },
 
+        gopls = {},
+
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -758,35 +760,37 @@ require('lazy').setup({
           },
         },
 
-        tsserver = {
-          handlers = {
-            ['window/showMessage'] = function(_, result)
-              vim.notify('LSP Error' .. result.message, vim.log.levels.ERROR)
-            end,
-          },
-          commands = {
-            OrganizeImports = {
-              function()
-                tsserver_organize_imports()
-              end,
-              description = 'Organize Imports',
-            },
-          },
-          settings = {
-            typescript = {
-              inlayHints = jsInlaySettings,
-            },
-            javascript = {
-              inlayHints = jsInlaySettings,
-            },
-            typescriptreact = {
-              inlayHints = jsInlaySettings,
-            },
-            javascriptreact = {
-              inlayHints = jsInlaySettings,
-            },
-          },
-        },
+        -- tsserver = {
+        --   enableTracing = true,
+        --   log = 'verbose',
+        --   handlers = {
+        --     ['window/showMessage'] = function(_, result)
+        --       vim.notify('LSP Error' .. result.message, vim.log.levels.ERROR)
+        --     end,
+        --   },
+        --   commands = {
+        --     OrganizeImports = {
+        --       function()
+        --         tsserver_organize_imports()
+        --       end,
+        --       description = 'Organize Imports',
+        --     },
+        --   },
+        --   settings = {
+        --     typescript = {
+        --       inlayHints = jsInlaySettings,
+        --     },
+        --     javascript = {
+        --       inlayHints = jsInlaySettings,
+        --     },
+        --     typescriptreact = {
+        --       inlayHints = jsInlaySettings,
+        --     },
+        --     javascriptreact = {
+        --       inlayHints = jsInlaySettings,
+        --     },
+        --   },
+        -- },
       }
 
       -- Ensure the servers and tools above are installed
@@ -803,12 +807,23 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
       })
+
+      -- FIXME: temporary hack to prevent Mason from installing gopls until it's compiled with Go 1.23+ to support iterators
+      for i, v in ipairs(ensure_installed) do
+        if v == 'gopls' then
+          table.remove(ensure_installed, i)
+          break
+        end
+      end
+
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       local lspconfig = require 'lspconfig'
       local lspconfig_util = require 'lspconfig.util'
 
       require('mason-lspconfig').setup {
+        automatic_installation = false,
+        ensure_installed = ensure_installed,
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -876,6 +891,30 @@ require('lazy').setup({
       --   cmd = { 'dart', 'language-server', '--protocol=lsp' },
       --   inlayHints = { enabled = true },
       -- }
+      -- require('lspconfig')['tsp_server'].setup {}
+      require('lspconfig')['gopls'].setup {}
+      vim.api.nvim_create_autocmd('BufWritePre', {
+        pattern = '*.go',
+        callback = function()
+          local params = vim.lsp.util.make_range_params()
+          params.context = { only = { 'source.organizeImports' } }
+          -- buf_request_sync defaults to a 1000ms timeout. Depending on your
+          -- machine and codebase, you may want longer. Add an additional
+          -- argument after params if you find that you have to write the file
+          -- twice for changes to be saved.
+          -- E.g., vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 3000)
+          local result = vim.lsp.buf_request_sync(0, 'textDocument/codeAction', params)
+          for cid, res in pairs(result or {}) do
+            for _, r in pairs(res.result or {}) do
+              if r.edit then
+                local enc = (vim.lsp.get_client_by_id(cid) or {}).offset_encoding or 'utf-16'
+                vim.lsp.util.apply_workspace_edit(r.edit, enc)
+              end
+            end
+          end
+          vim.lsp.buf.format { async = false }
+        end,
+      })
     end,
   },
 
@@ -898,7 +937,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = true, cpp = true, tsp = false }
         return {
           timeout_ms = 500,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
@@ -912,10 +951,11 @@ require('lazy').setup({
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- TODO: extract to a common var
-        javascript = { { 'prettierd', 'prettier' } },
-        javascriptreact = { { 'prettierd', 'prettier' } },
-        typescript = { { 'prettierd', 'prettier' } },
-        typescriptreact = { { 'prettierd', 'prettier' } },
+        -- javascript = { { 'prettierd', 'prettier' } },
+        -- javascriptreact = { { 'prettierd', 'prettier' } },
+        -- typescript = { { 'prettierd', 'prettier' } },
+        -- typescriptreact = { { 'prettierd', 'prettier' } },
+        -- typespec = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -1043,18 +1083,17 @@ require('lazy').setup({
         },
       }
 
-      vim.cmd.colorscheme 'github_light_default'
+      vim.cmd.colorscheme 'github_dark'
       vim.cmd.hi 'Comment gui=none'
     end,
   },
-
   -- {
   --   'folke/tokyonight.nvim',
   --   lazy = false,
   --   priority = 1000,
   --   config = function()
   --     require('tokyonight').setup {
-  --       style = 'night',
+  --       style = 'day',
   --       transparent = true,
   --       styles = {
   --         sidebars = 'transparent',
@@ -1073,7 +1112,7 @@ require('lazy').setup({
   --   lazy = false,
   --   config = function()
   --     require('catppuccin').setup {
-  --       flavour = 'mocha',
+  --       flavour = 'latte',
   --       transparent_background = true,
   --     }
   --
